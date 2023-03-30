@@ -1,0 +1,102 @@
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+public class Lector {
+	List<String[]> renglonesList;
+	String[][] matrizEmails; 
+	List<String> palabras;
+	HashMap<String, Integer> emails =  new LinkedHashMap<>();
+	int ID, ultimos;
+	String IDString;
+	
+	public void Ejecutar(int ID) throws IOException {
+		this.ID = ID;
+		CrearMatriz();
+		CrearHashMap();
+		CrearFile();
+	}
+	
+	public void TresUltimos() {
+		IDString = Integer.toString(ID);
+	    String ultimosTres = IDString.substring(IDString.length() - 3);
+	    ultimos = Integer.parseInt(ultimosTres);
+	    System.out.println(ultimos);
+	}
+	
+	public void CrearMatriz() {
+		//leemos doc
+		renglonesList = new ArrayList<String[]>();
+		try (BufferedReader br = new BufferedReader(new FileReader("/Users/lesly/Desktop/emails.csv"))) {
+		    String line;
+		    while ((line = br.readLine()) != null) {
+		        String[] emails = line.split(",");
+		        renglonesList.add(emails);
+		    }
+		    br.close();
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
+		
+		//creamos matriz
+		matrizEmails = new String[renglonesList.size()][];
+		for (int i = 0; i < renglonesList.size(); i++) {
+		    String[] renglones = renglonesList.get(i);
+		    matrizEmails[i] = renglones ;
+		}
+		//imprimir matriz
+		/*for(int i = 0; i < 3; i++) {
+			for(int j = 0; j < 5; j++){
+				System.out.print(matrizEmails[i][j]+ " ");
+			}
+			System.out.println("");
+		}*/
+	}
+	
+	public String ValorMatriz(int i ,int j) {
+		return matrizEmails[i][j];
+	}
+	
+	public void CrearHashMap() {
+		TresUltimos();
+		palabras = new ArrayList<String>();
+		//meter string palabras
+		for(int j = 1; j < 3001; j++) {
+			emails.put(ValorMatriz(0,j), 0);
+		}
+		//meter valores de palabras
+		for(int j = 1; j < 3001; j++) {
+			int valor = 0;
+			for(int i = ultimos; i < (ultimos + 51); i++) {
+				valor = valor + Integer.parseInt(ValorMatriz(i,j));
+			}	
+			emails.replace(ValorMatriz(0,j), valor);
+		}
+	}
+	
+	public void CrearFile() {
+		try {
+			FileWriter writer = new FileWriter(IDString + ".txt");
+	        BufferedWriter bufWriter = new BufferedWriter(writer);
+	        for (Map.Entry<String, Integer> entry : emails.entrySet()) {
+	        	bufWriter.write(entry.getKey() + "," + entry.getValue());
+	            bufWriter.newLine();
+	        }
+	        bufWriter.close();
+	        writer.close();
+	        System.out.println("yei! se logro!");
+	        } catch (IOException e) {
+	    	System.out.println("ERROR!ERROR! EN: " + e.getMessage());
+	    	}
+	}
+	
+	
+}
